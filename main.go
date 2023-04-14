@@ -81,6 +81,7 @@ func handleConnection(conn net.Conn, p *Printer) {
 		response := p.Print(zpl)
 		fmt.Fprintln(conn, response)
 	}
+
 	if err := scanner.Err(); err != nil {
 		fmt.Println(err)
 	}
