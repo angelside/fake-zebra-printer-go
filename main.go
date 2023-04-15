@@ -24,6 +24,10 @@ func (p *Printer) Print(zpl string) string {
 	fmt.Println(zpl)
 	return zpl
 
+	// TODO: Catch password reset
+	// ^XA^KP%s^JUS^XZ
+
+
 	/*
 	// use a regular expression to search for the pattern ^FD followed by a sequence of digits
 	re := regexp.MustCompile(`\^FD(\d+)`)
