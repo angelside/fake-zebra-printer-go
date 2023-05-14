@@ -1,6 +1,3 @@
-/*
-The startServer function starts a server that listens for incoming connections on IP address 127.0.0.1 and port 9100. When a connection is accepted, the handleConnection function is called in a separate goroutine to handle the incoming data. The handleConnection function reads lines of ZPL code from the connection using a scanner, and for each line of input it calls the Print method of the Printer struct to get the response. The response is then written back to the connection using the fmt.Fprintln
-*/
 package main
 
 import (
@@ -54,14 +51,18 @@ func (p *Printer) Print(zpl string) string {
 func startServer() {
 	p := &Printer{}
 
+	// TODO: Can we use 0.0.0.0 for local and LAN?
+	ipPort := "127.0.0.1:9100"
+
 	// Listen for incoming connections on IP address 127.0.0.1 and port 9100
-	ln, err := net.Listen("tcp", "127.0.0.1:9100")
+	ln, err := net.Listen("tcp", ipPort)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer ln.Close()
-	fmt.Println("Listening for connections on 127.0.0.1:9100")
+
+	fmt.Printf("Listening for connections on %s", ipPort)
 
 	// Accept incoming connections
 	for {
@@ -81,8 +82,8 @@ func handleConnection(conn net.Conn, p *Printer) {
 
 	// Reads lines of ZPL code from the connection
 	for scanner.Scan() {
-		zpl := scanner.Text()
-		response := p.Print(zpl)
+		code := scanner.Text()
+		response := p.Print(code)
 		fmt.Fprintln(conn, response)
 	}
 
