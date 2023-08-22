@@ -62,7 +62,7 @@ func startServer() {
 	}
 	defer ln.Close()
 
-	fmt.Printf("Listening for connections on %s", ipPort)
+	fmt.Printf("Listening for connections on %s \n\n", ipPort)
 
 	// Accept incoming connections
 	for {
@@ -86,6 +86,7 @@ func handleConnection(conn net.Conn, p *Printer) {
 		response := p.Print(code)
 		fmt.Fprintln(conn, response)
 	}
+	fmt.Println()
 
 	if err := scanner.Err(); err != nil {
 		fmt.Println(err)
