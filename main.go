@@ -4,8 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	//"log"
 	//"strings"
-    //"regexp"
+	//"regexp"
 )
 
 func main() {
@@ -17,6 +18,9 @@ type Printer struct{}
 // Sends a string of ZPL code to the printer and returns the printer's response
 func (p *Printer) Print(zpl string) string {
 
+	//log.Println("Hello from Go application!")
+	//fmt.Println()
+
 	// TODO: later remove it
 	fmt.Println(zpl)
 	return zpl
@@ -24,27 +28,26 @@ func (p *Printer) Print(zpl string) string {
 	// TODO: Catch password reset
 	// ^XA^KP%s^JUS^XZ
 
-
 	/*
-	// use a regular expression to search for the pattern ^FD followed by a sequence of digits
-	re := regexp.MustCompile(`\^FD(\d+)`)
-	match := re.FindStringSubmatch(zpl)
-	if len(match) > 1 {
-		// the first group of the regular expression is the sequence of digits
-		fmt.Println(match[1]) // prints "105925"
-	}
+		// use a regular expression to search for the pattern ^FD followed by a sequence of digits
+		re := regexp.MustCompile(`\^FD(\d+)`)
+		match := re.FindStringSubmatch(zpl)
+		if len(match) > 1 {
+			// the first group of the regular expression is the sequence of digits
+			fmt.Println(match[1]) // prints "105925"
+		}
 	*/
 
 	/*
-	// parse the ZPL code and perform the corresponding actions
-	if strings.Contains(zpl, "^FO50,50") {
-		// ^FO50,50 indicates the start of a text field at position 50,50
-		return "OK"
-	} else if strings.Contains(zpl, "^FDHello, World!^FS") {
-		// ^FD specifies the field data and ^FS indicates the end of the field
-		return "PRINTED: Hello, World!"
-	}
-	return "INVALID ZPL CODE"
+		// parse the ZPL code and perform the corresponding actions
+		if strings.Contains(zpl, "^FO50,50") {
+			// ^FO50,50 indicates the start of a text field at position 50,50
+			return "OK"
+		} else if strings.Contains(zpl, "^FDHello, World!^FS") {
+			// ^FD specifies the field data and ^FS indicates the end of the field
+			return "PRINTED: Hello, World!"
+		}
+		return "INVALID ZPL CODE"
 	*/
 }
 
