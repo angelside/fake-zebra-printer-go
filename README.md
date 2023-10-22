@@ -39,7 +39,7 @@ Windows
 
 ### 📋 Sample results
 
-![fake-zebra-printer_dark](https://github.com/angelside/fake-zebra-printer-go/assets/7515/b82e2d6d-b8e4-459f-a416-f5804c516257)
+![fake-zebra-printer_dark](https://github.com/angelside/fake-zebra-printer-go/assets/7515/500564cd-68a3-4ba5-a5da-a12d51a35f4f)
 
 ## 💥 Features
 
