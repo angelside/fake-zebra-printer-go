@@ -3,7 +3,7 @@ version: "3"
 env:
   PROJECT_PKG: app
 
-  BINARY_NAME: fakeZplPrinter
+  BINARY_NAME: fakeZebraPrinter
   BUILD_DIR: __dist
   BUILD_FILE: "{{.BUILD_DIR}}/{{.BINARY_NAME}}.exe"
 
