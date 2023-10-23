@@ -12,27 +12,52 @@ import (
 
 func printData(data string) {
 	// Datetime
-	curtime := createDate()
+	currentTime := createDate()
 
 	// Colorize the data
 	data = colorizeData(data)
 
 	// Render a table
-	tableRender(curtime, data)
+	tableRender(currentTime, data)
 }
 
 func createDate() string {
 	// Format the date
 	dateFormat := "02/01/2006 15:04:05" // FIXME: Hard coded data
-	curtime := time.Now().Format(dateFormat)
+	currentTime := time.Now().Format(dateFormat)
 
 	// Colorize the time
-	timeColor := color.New(color.FgCyan).Add(color.Bold)
-	curtime = timeColor.Sprint(curtime)
+	currentTime = color.New(color.FgCyan, color.Bold).Sprint(currentTime)
 
-	return curtime
+	return currentTime
 }
 
+func colorizeData(data string) string {
+	if !isValidZplData(data) {
+		return data
+	}
+
+	templateVarColor := color.New(color.FgGreen)
+	zplVarColor := color.New(color.FgYellow)
+
+	data = colorizePattern(data, `[~^][A-Z]{1,2}`, zplVarColor)
+	data = colorizePattern(data, `{{\..*?}}`, templateVarColor)
+
+	return data
+}
+
+func isValidZplData(data string) bool {
+	return strings.HasPrefix(data, "^XA") && strings.HasSuffix(data, "^XZ")
+}
+
+func colorizePattern(data string, pattern string, color *color.Color) string {
+	re := regexp.MustCompile(pattern)
+	return re.ReplaceAllStringFunc(data, func(match string) string {
+		return color.Sprint(match)
+	})
+}
+
+/*
 func colorizeData(data string) string {
 	// Check if the data starts with ^XA and ends with ^XZ
 	if strings.HasPrefix(data, "^XA") && strings.HasSuffix(data, "^XZ") {
@@ -59,10 +84,11 @@ func colorizeData(data string) string {
 
 	return data
 }
+*/
 
-func tableRender(curtime string, data string) {
+func tableRender(currentTime string, data string) {
 	t := table.NewWriter()
-	t.AppendHeader(table.Row{curtime})
+	t.AppendHeader(table.Row{currentTime})
 	t.AppendRow(table.Row{data})
 
 	fmt.Println(t.Render())
