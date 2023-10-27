@@ -50,43 +50,15 @@ func isValidZplData(data string) bool {
 	return strings.HasPrefix(data, "^XA") && strings.HasSuffix(data, "^XZ")
 }
 
-func colorizePattern(data string, pattern string, color *color.Color) string {
+func colorizePattern(data string, pattern string, c *color.Color) string {
 	re := regexp.MustCompile(pattern)
+
 	return re.ReplaceAllStringFunc(data, func(match string) string {
-		return color.Sprint(match)
+		return c.Sprint(match)
 	})
 }
 
-/*
-func colorizeData(data string) string {
-	// Check if the data starts with ^XA and ends with ^XZ
-	if strings.HasPrefix(data, "^XA") && strings.HasSuffix(data, "^XZ") {
-		// Create colors for the template variables and the rule-matching text
-		templateVarColor := color.New(color.FgGreen)
-		zplVarColor := color.New(color.FgYellow)
-
-		// Define a regular expression pattern to match the rule
-		zplVarPattern := regexp.MustCompile(`[~^][A-Z]{1,2}`)
-
-		// Replace all matches of the rule with the colored version
-		data = zplVarPattern.ReplaceAllStringFunc(data, func(match string) string {
-			return zplVarColor.Sprint(match)
-		})
-
-		// Define a regular expression pattern to match template variables
-		templateVarPattern := regexp.MustCompile(`{{\..*?}}`)
-
-		// Replace all template variables with the templateVarColor
-		data = templateVarPattern.ReplaceAllStringFunc(data, func(match string) string {
-			return templateVarColor.Sprint(match)
-		})
-	}
-
-	return data
-}
-*/
-
-func tableRender(currentTime string, data string) {
+func tableRender(currentTime, data string) {
 	t := table.NewWriter()
 	t.AppendHeader(table.Row{currentTime})
 	t.AppendRow(table.Row{data})

@@ -10,13 +10,14 @@ import (
 	"github.com/fatih/color"
 )
 
-func startServer(ip string, port string) {
+func startServer(ip, port string) {
 	address := fmt.Sprintf("%s:%s", ip, port)
 
 	// Create a TCP listener
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		fmt.Println("Error:", err)
+
 		return
 	}
 	defer listener.Close()
