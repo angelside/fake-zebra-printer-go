@@ -92,6 +92,6 @@ linters:
     - unparam
     - usestdlibvars
     #- whitespace
-    - wrapcheck
+    #- wrapcheck
     #- wsl
     #- zerologlint
