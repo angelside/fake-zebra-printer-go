@@ -16,3 +16,9 @@ tasks:
       - go build -v {{.LDFLAGS}} -o {{.BUILD_FILE}}
       #- upx --best {{.RELEASE_FILE}}
     #ignore_error: true
+  check-updates:
+    desc: Available minor and patch upgrades for all direct and indirect dependencies.
+    cmd: go list -m -u all
+  upgrade:
+    desc: This upgrades to the latest or minor patch release.
+    cmd: go get -u ./...
