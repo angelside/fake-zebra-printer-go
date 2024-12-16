@@ -1,24 +1,221 @@
+#   _____         _     __ _ _
+# |_   _|_ _ ___| | __/ _(_) | ___
+#   | |/ _` / __| |/ / |_| | |/ _ \
+#   | | (_| \__ \   <|  _| | |  __/
+#   |_|\__,_|___/_|\_\_| |_|_|\___|
+#
+# https://taskfile.dev
+#
+
+# Windows OS: Install git with scoop and add below to the PATH
+# %USERPROFILE%\scoop\apps\git\current\usr\bin
+
+---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
+silent: true
 
-env:
-  PROJECT_PKG: app
+##
+## === 🪣 Variables ====================================================
+##
 
+vars:
   BINARY_NAME: fakeZebraPrinter
-  BUILD_DIR: __dist
-  BUILD_FILE: "{{.BUILD_DIR}}/{{.BINARY_NAME}}.exe"
+  VERSION: 0.0.1
+  HASH: $([ -d .git ] && git rev-parse --short HEAD || echo "dev")
+
+  ENTRY_POINT: . # ./cmd/. | ./src/.
+  BUILD_DIR: __dist # dist, tmp, build, .bin, etc
+  BUILD_FILE: "./{{.BUILD_DIR}}/{{.BINARY_NAME}}"
+  RELEASE_FILE: "./{{.BUILD_DIR}}/release/{{.BINARY_NAME}}"
+
+  TASK_COMMAND: '{{if eq OS "windows"}}task{{else}}go-task{{end}}'
 
   LDFLAGS: -ldflags="-s -w"
 
+  GO_VERSION: $(go version)
+
+  #GIT_REPO_NAME:
+  #  sh: basename $(git remote get-url origin)
+
+##
+## === 🪒 Tasks ========================================================
+##
+
 tasks:
-  build:
-    desc: Build the go binary.
+  default:
     cmds:
-      - go build -v {{.LDFLAGS}} -o {{.BUILD_FILE}}
-      #- upx --best {{.RELEASE_FILE}}
-    #ignore_error: true
-  check-updates:
-    desc: Available minor and patch upgrades for all direct and indirect dependencies.
+      - '{{.TASK_COMMAND}} help'
+
+  ## ===❓ HELP ========================================================
+
+  help:
+    cmds:
+      - clear
+      - echo " _____         _     __ _ _"
+      - echo "|_   _|_ _ ___| | __/ _(_) | ___"
+      - echo '  | |/ _` / __| |/ / |_| | |/ _ \'
+      - echo "  | | (_| \__ \   <|  _| | |  __/"
+      - echo "  |_|\__,_|___/_|\_\_| |_|_|\___|"
+      #- echo " "
+      - echo "                  for Go projects"
+      - echo "-------------------------------------------------------------"
+      - echo " "
+      - 'echo "✨ Usage:💲 task TASK_NAME"'
+      - 'echo "✨ Passing arguments for dev:💲 task run -- args"'
+      - echo " "
+      - echo "🔥 BINARY INFO ----------------------------------------------"
+      - 'echo "Binary name: {{.BINARY_NAME}}"'
+      - 'echo "Binary version: {{.VERSION}}"'
+      - 'echo "Current system: {{OS}}/{{ARCH}}"'
+      - echo " "
+      - echo "🪒 DEV TASKS ------------------------------------------------"
+      - echo "* run                        Run without build."
+      - 'echo "* tool:check-updates:        List available go upgrades for all dependencies."'
+      - 'echo "* tool:validate:             Validate all config files."'
+      - echo " "
+      - echo "🪒 All TASKS ------------------------------------------------"
+      - '{{.TASK_COMMAND}} --list'
+
+  ## === 🚀 RUN =========================================================
+
+  run:
+    desc: Run without build.
+    cmd: go run {{.ENTRY_POINT}} {{.CLI_ARGS}}
+
+  ## === 📦 BUILD ======================================================
+
+  # go build -ldflags="-s -w -X 'main.BuildVersion={{.VERSION}}' -X 'main.BuildHash={{.HASH}}'" -o {{.BUILD_FILE}}{{exeExt}} {{.ENTRY_POINT}}
+  # go build -a -ldflags "-X {{.PATH}}/main.BuildDate={{.DATE}} -X {{.PATH}}/main.BuildVersion={{.VERSION}} -extldflags '-static' -s -w" -o ci-build/{{.BINARY_NAME}} {{.ENTRY_POINT}}
+
+  build:windows:
+    desc: Build the binary for Windows.
+    cmds:
+      - echo "🪟 Building the Windows binary... >> {{.BUILD_FILE}}{{exeExt}}"
+      - go build -v {{.LDFLAGS}} -o {{.BUILD_FILE}}{{exeExt}} {{.ENTRY_POINT}}
+    # TODO: https://taskfile.dev/usage/#prevent-unnecessary-work
+    #sources:
+    #  - ./**/*.go
+    env:
+      GOOS: windows
+      GOARCH: amd64
+    #silent: true
+
+  build:linux:
+    desc: Build the binary for linux.
+    cmds:
+      - echo "🐧 Building the linux binary... >> {{.BUILD_FILE}}"
+      - go build -v {{.LDFLAGS}} -o {{.BUILD_FILE}} {{.ENTRY_POINT}}
+    env:
+      GOOS: linux
+      GOARCH: amd64
+
+  build:darwin:
+    desc: Build the binary for MacOS.
+    cmds:
+      - echo "📦 Building the MacOS binary... >> {{.BUILD_FILE}}"
+      - go build -v {{.LDFLAGS}} -o {{.BUILD_FILE}} {{.ENTRY_POINT}}
+    env:
+      GOOS: darwin
+      GOARCH: amd64
+
+  ## === 🎀 RELEASE ====================================================
+
+  release:windows:
+    desc: Build the binary for Windows, compress with upx.
+    cmds:
+      - task: build:windows
+      - task: upx:windows
+    ignore_error: true
+
+  release:linux:
+    desc: Build the binary for linux, compress with upx.
+    cmds:
+      - task: build:linux
+      - task: upx:linux
+    ignore_error: true
+
+  #
+  # Internal tools for releases
+  #
+
+  # Compress the windows binary
+  upx:windows:
+    internal: true
+    cmds:
+      - echo "💥 Compressing the Windows binary... >> {{.BUILD_FILE}}_upx{{exeExt}}"
+      - upx -qq --best {{.BUILD_FILE}}{{exeExt}} -o {{.BUILD_FILE}}_upx{{exeExt}}
+
+  # Compress the linux binary
+  upx:linux:
+    internal: true
+    cmds:
+      - echo "💥 Compressing the linux binary... >> {{.BUILD_FILE}}_upx"
+      - upx -qq --best {{.BUILD_FILE}} -o {{.BUILD_FILE}}_upx
+
+
+  ## === 💫 GO RELEASER ================================================
+
+  # TODO: Need test
+  goreleaser:build:
+    desc: Build the binary file with "goreleaser".
+    cmd: goreleaser build --snapshot --clean --single-target
+
+  # TODO: Need test
+  goreleaser:snapshot:
+    desc: Release a version from snapshot with "goreleaser".
+    cmd: goreleaser release --snapshot --clean
+
+
+  ## === 🚩 OTHER ======================================================
+
+  info:
+    desc: Info.
+    cmds:
+      - echo "OS = {{OS}}"
+      - echo "ARCH = {{ARCH}}"
+      - echo "exeExt = {{exeExt}}"
+      - echo "BINARY_NAME = {{.BINARY_NAME}}"
+      - echo "BUILD_FILE = {{.BUILD_FILE}}{{exeExt}}"
+      - echo "HASH = {{.HASH}}"
+      - echo "OUTPUT = {{.BINARY_NAME}}_{{OS}}_{{ARCH}}{{exeExt}}"
+      - echo "COMMIT_HASH = {{.COMMIT_HASH}}"
+      - echo "BUILD_DATE = {{.BUILD_DATE}}"
+      - 'echo "GO = {{.GO_VERSION}}"'
+    vars:
+      COMMIT_HASH:
+        #sh: git rev-parse --short HEAD 2>/dev/null
+        #sh: -d .git && git rev-parse --short HEAD || echo "dev"
+      BUILD_DATE:
+        sh: date +%FT%T%z
+
+  ## === 🧩 TOOLS ======================================================
+
+  # List available minor and patch upgrades for all direct and indirect go dependencies.
+  tool:check-updates:
+    desc: List available go upgrades for all dependencies.
     cmd: go list -m -u all
-  upgrade:
-    desc: This upgrades to the latest or minor patch release.
+
+  # Update dependencies
+  tool:update:
+    desc: Update dependencies to the latest or minor patch release.
     cmd: go get -u ./...
+
+  # https://github.com/Boeing/config-file-validator
+  tool:validate:
+    desc: Validate all config files.
+    cmds:
+      - echo '== Config file validator'
+      - echo
+      - validator --groupby pass-fail --exclude-dirs bin,build,dist,__dist,node_modules,.svelte-kit,.vscode
+
+  # https://github.com/securego/gosec
+  # Inspects source code for security problems by scanning the Go AST and SSA code representation.
+  tool:gosec:
+    desc: Inspects go source codes for security problems.
+    #cmd: gosec -no-fail -quiet ./...
+    cmds:
+      - echo '== Go security checker'
+      - echo
+      - gosec -no-fail ./...
+    ignore_error: true
