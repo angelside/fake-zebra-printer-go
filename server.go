@@ -10,7 +10,7 @@ import (
 	"github.com/fatih/color"
 )
 
-func startServer(ip, port string) {
+func startServer(ip string, port string) {
 	address := fmt.Sprintf("%s:%s", ip, port)
 
 	// Create a TCP listener
